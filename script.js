@@ -22,10 +22,91 @@ let thingy = ["ab", "aa", "ac", "ad", "ae", "af", "ag", "ah", "ai", "aj", "ak", 
 let alreadyplayed = [];
 let timecounter = 10001;
 let reason = "";
+let difference = 0;
+let rdif = 0;
+let bdif = 0;
+let buildup;
 
 
+function calcdif(){
+  if (difference > -1){
+    rdif = difference;
+    bdif = 0;
+  }
+  else{
+    bdif = Math.abs(difference);
+    rdif = 0;
+  }
+  farthestb = 12;
+  farthestr = 0;
+  for (let y = 0; y < height; y++){
+    for (let x = 0; x < width; x++){
+      if (grid[y][x] == 1){
+        if (y > farthestr){
+          farthestr = y
+        }
+      }
+      if (grid[y][x] == 2){
+        if (y < farthestb){
+          farthestb = y
+        }
+      }
+    }
+  }
+  difference = farthestr - (12 - farthestb)
+}
 
 
+function checkboard(){
+  let neighbors = 100;
+  for (let y = 0; y < height; y++){
+    for (let x = 0; x < width; x++){
+      neighbors = 100;
+
+      if (grid[y][x] == 3 && y > 0 && y < height - 1){
+        neighbors = 0
+        let coords2 = x + " " + y
+        let indexed = selectedcoords.indexOf(coords2)
+        if (selectedcolors[indexed] == 1){
+          neighbors += 100
+        }
+        for (let a1 = 0; a1 < 3; a1++){
+          for (let a2 = 0; a2 < 3; a2++){
+            of1 = a1 - 1
+            of2 = a2 - 1
+            if (of1 == 0 && of2 == 0){
+              continue
+            }
+            if (y+of1 > grid.length - 1 || x + of2 > grid[0].length - 1){
+              continue;
+            }
+            if (y + of1 < 0|| x + of2 < 0){
+              continue;
+            }
+            if (grid[y+of1][x+of2] == 3){
+              neighbors += 1;
+            }
+          }
+        }
+      }
+      if (neighbors == 0){
+        let coords = x + " " + y
+        let selectedindex = selectedcoords.indexOf(coords)
+        tempsetbox(x, y, selectedcolors[selectedindex]);
+        played -= 1
+        selectedcolors.splice(selectedindex, 1)
+        selectedcoords.splice(selectedindex, 1)
+        currentword = currentword.slice(0, selectedindex) + currentword.slice(selectedindex + 1);
+        if (lastx == x && lasty == y && played > 0){
+
+          lastx = selectedcoords[selectedcoords.length - 1][0]
+          lastcoords = selectedcoords[selectedcoords.length - 1].split(" ")
+          lasty = lastcoords[1]
+        }
+      }
+    }
+  }
+}
 
 
 function update(){
@@ -33,7 +114,9 @@ function update(){
     timecounter += 1
    }
    drawboard();
+   calcdif();
    requestAnimationFrame(update);
+   checkboard();
 }
 
 
@@ -280,9 +363,19 @@ function drawboard(){
       }
     }
   }
+  ctx.globalAlpha = 0.2;
+  let rval = 255-(bdif*21);
+  let bval = 255-(rdif*21);
+  let gval = bval;
+  if (bval > rval){
+    gval = rval;
+  }
+  buildup = "rgb(" + rval + "," + gval + "," + bval + ")";
+  ctx.fillStyle = buildup;
+  ctx.fillRect(0, 150, 500, 550)
   ctx.globalAlpha = 1;
   ctx.font = "bolder 35px Arial";
-  ctx.fillStyle = "black"
+  ctx.fillStyle = "#000"
   ctx.fillRect(498, 0, 2, 748)
   ctx.fillRect(90, 0, 2, 100)
   ctx.fillRect(0, 98, 182, 2)
