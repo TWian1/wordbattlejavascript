@@ -26,6 +26,7 @@ let difference = 0;
 let rdif = 0;
 let bdif = 0;
 let buildup;
+let connencted = [];
 
 
 function calcdif(){
@@ -58,51 +59,71 @@ function calcdif(){
 
 
 function checkboard(){
-  let neighbors = 100;
-  for (let y = 0; y < height; y++){
-    for (let x = 0; x < width; x++){
-      neighbors = 100;
-
-      if (grid[y][x] == 3 && y > 0 && y < height - 1){
-        neighbors = 0
-        let coords2 = x + " " + y
-        let indexed = selectedcoords.indexOf(coords2)
-        if (selectedcolors[indexed] == 1){
-          neighbors += 100
+  let verifiedlist = [];
+  for (let checkdepth = 0; checkdepth < 30; checkdepth++){
+    for (let y = 0; y < height; y++){
+      for (let x = 0; x < width; x++){
+        if (grid[y][x] == 3){
+          verifiedlist.push([x, y])
         }
-        for (let a1 = 0; a1 < 3; a1++){
-          for (let a2 = 0; a2 < 3; a2++){
-            of1 = a1 - 1
-            of2 = a2 - 1
-            if (of1 == 0 && of2 == 0){
-              continue
-            }
-            if (y+of1 > grid.length - 1 || x + of2 > grid[0].length - 1){
-              continue;
-            }
-            if (y + of1 < 0|| x + of2 < 0){
-              continue;
-            }
-            if (grid[y+of1][x+of2] == 3){
-              neighbors += 1;
+        if (grid[y][x] == 1){
+          
+
+          let check1 = false;
+          for (let a1 = 0; a1 < verifiedlist.length; a1++){
+            if (verifiedlist[a1] == [x, y]){
+              check1 = true;
             }
           }
+          if (check1 == false){
+            if (y == 0){
+              verifiedlist.push([x, y]);
+            }
+            else{
+              for (let a1 = 0; a1 < 3; a1++){
+                for (let a2 = 0; a2 < 3; a2++){
+                  let of1 = a1 - 1;
+                  let of2 = a2 - 1;
+                  if (of1 == 0 && of2 == 0){
+                    continue;
+                  }
+
+
+
+                  let check1 = false;
+                  for (let a1 = 0; a1 < verifiedlist.length; a1++){
+                    if (verifiedlist[a1] == [x + of2, y + of1]){
+                      check1 = true;
+                    }
+                  }
+                  for (let a1 = 0; a1 < verifiedlist.length; a1++){
+                    if (verifiedlist[a1] == [x, y]){
+                      check1 = false;
+                    }
+                  }
+                  if (check1){
+                    verifiedlist.push([x, y]);
+                  }
+                }
+              }   
+            }
+
+          }
+
         }
       }
-      if (neighbors == 0){
-        let coords = x + " " + y
-        let selectedindex = selectedcoords.indexOf(coords)
-        tempsetbox(x, y, selectedcolors[selectedindex]);
-        played -= 1
-        selectedcolors.splice(selectedindex, 1)
-        selectedcoords.splice(selectedindex, 1)
-        currentword = currentword.slice(0, selectedindex) + currentword.slice(selectedindex + 1);
-        if (lastx == x && lasty == y && played > 0){
-
-          lastx = selectedcoords[selectedcoords.length - 1][0]
-          lastcoords = selectedcoords[selectedcoords.length - 1].split(" ")
-          lasty = lastcoords[1]
+    }
+  }
+  for (let y = 0; y < height; y++){
+    for (let x = 0; x < width; x++){
+      let check1 = false;
+      for (let a1 = 0; a1 < verifiedlist.length; a1++){
+        if (verifiedlist[a1] == [x, y]){
+          check1 = true;
         }
+      }
+      if (check1){
+        grid[y][x] == 0;
       }
     }
   }
@@ -112,6 +133,9 @@ function checkboard(){
 function update(){
    if (timecounter < 10000){ 
     timecounter += 1
+   }
+   if (played < 0){
+     played = 0
    }
    drawboard();
    calcdif();
